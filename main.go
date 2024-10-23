@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -11,4 +12,12 @@ func main() {
 		fmt.Println("Error!")
 	}
 	fmt.Printf(response.Status)
+
+	body, err := io.ReadAll(response.Body)
+
+	if err != nil {
+		fmt.Println("Error fetching body")
+	}
+
+	fmt.Println(string(body))
 }
