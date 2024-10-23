@@ -1,28 +1,11 @@
 package main
 
-import (
-	"fmt"
-	"io"
-	"net/http"
-)
+import "fmt"
 
 func main() {
-	response, err := http.Get("https://api.github.com")
-	if err != nil {
-		fmt.Println("Error!", err)
-		return
-	}
+	var clientID string
+	fmt.Print("Please enter your Github Client ID: ")
+	fmt.Scan(&clientID)
+	fmt.Println(clientID)
 
-	defer response.Body.Close()
-
-	fmt.Println(response.Status)
-
-	body, err := io.ReadAll(response.Body)
-
-	if err != nil {
-		fmt.Println("Error fetching body: ", err)
-		return
-	}
-
-	fmt.Println(string(body))
 }
