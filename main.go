@@ -11,6 +11,9 @@ func main() {
 	if err != nil {
 		fmt.Println("Error!")
 	}
+
+	defer response.Body.Close()
+
 	fmt.Printf(response.Status)
 
 	body, err := io.ReadAll(response.Body)
