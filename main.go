@@ -9,7 +9,7 @@ import (
 func main() {
 	response, err := http.Get("https://api.github.com")
 	if err != nil {
-		fmt.Println("Error!")
+		fmt.Println("Error!", err)
 	}
 
 	defer response.Body.Close()
