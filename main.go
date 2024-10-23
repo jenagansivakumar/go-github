@@ -17,6 +17,12 @@ func main() {
 	data.Set("scope", "repo")
 
 	githubUrl := "https://github.com/login/device/code"
+	resp, err := http.PostForm(githubUrl, data)
+
+	if err != nil {
+		fmt.Println("Error sending request", err)
+		return
+	}
 
 	http.PostForm(githubUrl, data)
 
