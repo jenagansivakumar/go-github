@@ -1,0 +1,13 @@
+.env
+
+*.exe
+*.exe~
+*.out
+*.o
+*.a
+
+vendor/
+
+.DS_Store
+.idea/
+.vscode/
