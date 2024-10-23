@@ -10,6 +10,7 @@ func main() {
 	response, err := http.Get("https://api.github.com")
 	if err != nil {
 		fmt.Println("Error!", err)
+		return
 	}
 
 	defer response.Body.Close()
@@ -20,6 +21,7 @@ func main() {
 
 	if err != nil {
 		fmt.Println("Error fetching body: ", err)
+		return
 	}
 
 	fmt.Println(string(body))
