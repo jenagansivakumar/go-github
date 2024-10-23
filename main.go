@@ -14,12 +14,12 @@ func main() {
 
 	defer response.Body.Close()
 
-	fmt.Printf(response.Status)
+	fmt.Println(response.Status)
 
 	body, err := io.ReadAll(response.Body)
 
 	if err != nil {
-		fmt.Println("Error fetching body")
+		fmt.Println("Error fetching body: ", err)
 	}
 
 	fmt.Println(string(body))
