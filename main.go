@@ -13,6 +13,8 @@ func main() {
 	fmt.Println(clientID)
 
 	data := url.Values{}
+	data.Set("client_id", clientID)
+	data.Set("scope", "repo")
 
 	githubUrl := "https://github.com/login/device/code"
 
