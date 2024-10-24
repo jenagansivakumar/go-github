@@ -48,5 +48,8 @@ func main() {
 		return
 	}
 
+	fmt.Printf("Device Code: %s \n", deviceResponse.DeviceCode)
+	fmt.Printf("User Code: %s \n", deviceResponse.UserCode)
+	fmt.Printf("Verification URI: %s \n", deviceResponse.VerificationUri)
 	fmt.Println("Response received from GitHub")
 }
