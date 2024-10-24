@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 )
@@ -30,6 +31,15 @@ func main() {
 	}
 
 	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+
+	if err != nil {
+		fmt.Printf("Error: ", err)
+		return
+	}
+
+	fmt.Println(string(body))
 
 	fmt.Println("Response received from GitHub")
 
