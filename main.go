@@ -27,7 +27,6 @@ func main() {
 
 	githubUrl := "https://github.com/login/device/code"
 	resp, err := http.PostForm(githubUrl, data)
-
 	if err != nil {
 		fmt.Println("Error sending request", err)
 		return
@@ -44,7 +43,10 @@ func main() {
 
 	var deviceResponse DeviceResponse
 	err = json.Unmarshal(body, &deviceResponse)
+	if err != nil {
+		fmt.Println("Error parsing JSON:", err)
+		return
+	}
 
 	fmt.Println("Response received from GitHub")
-
 }
