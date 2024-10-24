@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -26,23 +27,23 @@ func main() {
 
 	githubUrl := "https://github.com/login/device/code"
 	resp, err := http.PostForm(githubUrl, data)
-	fmt.Printf("Response Status: %s \n", resp.Status)
 
 	if err != nil {
 		fmt.Println("Error sending request", err)
 		return
 	}
+	fmt.Printf("Response Status: %s \n", resp.Status)
 
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
-
 	if err != nil {
 		fmt.Println("Error: ", err)
 		return
 	}
 
-	fmt.Println(string(body))
+	var deviceResponse DeviceResponse
+	err = json.Unmarshal(body, &deviceResponse)
 
 	fmt.Println("Response received from GitHub")
 
