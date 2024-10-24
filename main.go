@@ -18,6 +18,11 @@ func pollForAccessTokens(deviceCode string, clientID string) {
 	data.Set("device_code", deviceCode)
 	data.Set("client_id", clientID)
 
+	resp, err := http.PostForm("https://github.com/login/oauth/access_token", data)
+	if err != nil {
+		fmt.Println("Error posting form: ", err)
+	}
+	io.ReadAll(resp.Body)
 }
 
 func main() {
