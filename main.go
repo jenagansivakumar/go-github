@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -41,12 +40,17 @@ func main() {
 		return
 	}
 
-	var deviceResponse DeviceResponse
-	err = json.Unmarshal(body, &deviceResponse)
+	fmt.Println("Raw Response Body:", string(body))
+
+	values, err := url.ParseQuery(string(body))
 	if err != nil {
 		fmt.Println("Error parsing JSON:", err)
 		return
 	}
+	var deviceResponse DeviceResponse
+	deviceResponse.DeviceCode = values.Get("device_code")
+	deviceResponse.UserCode = values.Get("user_code")
+	deviceResponse.VerificationUri = values.Get("verification_uri")
 
 	fmt.Printf("Device Code: %s \n", deviceResponse.DeviceCode)
 	fmt.Printf("User Code: %s \n", deviceResponse.UserCode)
