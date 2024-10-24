@@ -13,6 +13,13 @@ type DeviceResponse struct {
 	VerificationUri string `json:"verification_uri"`
 }
 
+func pollForAccessTokens(deviceCode string, clientID string) {
+	data := url.Values{}
+	data.Set("device_code", deviceCode)
+	data.Set("client_id", clientID)
+
+}
+
 func main() {
 	var clientID string
 	fmt.Print("Please enter your Github Client ID: ")
