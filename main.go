@@ -8,6 +8,9 @@ import (
 )
 
 type DeviceResponse struct {
+	DeviceCode      string
+	UserCode        string
+	VerificationUri string
 }
 
 func main() {
