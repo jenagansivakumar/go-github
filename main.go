@@ -8,9 +8,9 @@ import (
 )
 
 type DeviceResponse struct {
-	DeviceCode      string
-	UserCode        string
-	VerificationUri string
+	DeviceCode      string `json:"device_code"`
+	UserCode        string `json:"user_code"`
+	VerificationUri string `json:"verification_uri"`
 }
 
 func main() {
