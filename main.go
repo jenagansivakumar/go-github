@@ -35,7 +35,7 @@ func main() {
 	body, err := io.ReadAll(resp.Body)
 
 	if err != nil {
-		fmt.Printf("Error: ", err)
+		fmt.Println("Error: ", err)
 		return
 	}
 
