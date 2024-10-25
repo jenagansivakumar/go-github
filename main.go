@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 type DeviceResponse struct {
@@ -18,11 +19,27 @@ func pollForAccessTokens(deviceCode string, clientID string) {
 	data.Set("device_code", deviceCode)
 	data.Set("client_id", clientID)
 
-	resp, err := http.PostForm("https://github.com/login/oauth/access_token", data)
-	if err != nil {
-		fmt.Println("Error posting form: ", err)
+	maxAttempts := 10
+	interval := 1
+
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+
+		resp, err := http.PostForm("https://github.com/login/oauth/access_token", data)
+		if err != nil {
+			fmt.Println("Error posting form: ", err)
+			return
+		}
+
+		body, err := io.ReadAll(resp.Body)
+		defer resp.Body.Close()
+		if err != nil {
+			fmt.Println("Error retrieving body: ", err)
+			return
+		}
+		fmt.Printf("Polling attempt %d: %s\n", attempt, string(body))
+		time.Sleep(time.Duration(interval) * time.Second)
 	}
-	io.ReadAll(resp.Body)
+
 }
 
 func main() {
