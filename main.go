@@ -31,7 +31,7 @@ func pollForAccessTokens(deviceCode string, clientID string) {
 		}
 
 		body, err := io.ReadAll(resp.Body)
-		defer resp.Body.Close()
+		resp.Body.Close()
 		if err != nil {
 			fmt.Println("Error retrieving body: ", err)
 			return
