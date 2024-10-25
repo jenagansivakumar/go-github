@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -12,6 +13,12 @@ type DeviceResponse struct {
 	DeviceCode      string `json:"device_code"`
 	UserCode        string `json:"user_code"`
 	VerificationUri string `json:"verification_uri"`
+}
+
+type RepoRequest struct {
+	Name        string `json:name`
+	Description string `json:description`
+	Private     bool   `json:private`
 }
 
 func pollForAccessTokens(deviceCode string, clientID string) {
@@ -38,6 +45,11 @@ func pollForAccessTokens(deviceCode string, clientID string) {
 		}
 		fmt.Printf("Polling attempt %d: %s\n", attempt, string(body))
 		time.Sleep(time.Duration(interval) * time.Second)
+
+		if strings.Contains(string(body), "access_token") {
+			fmt.Println("Access token received.")
+			break
+		}
 	}
 
 }
