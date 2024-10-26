@@ -16,12 +16,24 @@ type DeviceResponse struct {
 }
 
 type RepoRequest struct {
-	Name        string `json:name`
-	Description string `json:description`
-	Private     bool   `json:private`
+	Name        string `json:"name"`
+	Description string `json:"description,omitempty"`
+	Private     bool   `json:"private"`
 }
 
-func pollForAccessTokens(deviceCode string, clientID string) {
+func extractAccessToken(body string) (string, error) {
+	values, err := url.ParseQuery(body)
+	if err != nil {
+		return "", fmt.Errorf("error parsing response: %v", err)
+	}
+	accessToken := values.Get("access_token")
+	if accessToken == "" {
+		return "", fmt.Errorf("access token not found in response")
+	}
+	return accessToken, nil
+}
+
+func pollForAccessTokens(deviceCode string, clientID string) (string, error) {
 	data := url.Values{}
 	data.Set("device_code", deviceCode)
 	data.Set("client_id", clientID)
@@ -30,28 +42,28 @@ func pollForAccessTokens(deviceCode string, clientID string) {
 	interval := 1
 
 	for attempt := 1; attempt <= maxAttempts; attempt++ {
-
 		resp, err := http.PostForm("https://github.com/login/oauth/access_token", data)
 		if err != nil {
-			fmt.Println("Error posting form: ", err)
-			return
+			return "", fmt.Errorf("error posting form")
 		}
 
 		body, err := io.ReadAll(resp.Body)
 		resp.Body.Close()
 		if err != nil {
-			fmt.Println("Error retrieving body: ", err)
-			return
+			return "", fmt.Errorf("error retrieving body: %v", err)
 		}
 		fmt.Printf("Polling attempt %d: %s\n", attempt, string(body))
-		time.Sleep(time.Duration(interval) * time.Second)
 
 		if strings.Contains(string(body), "access_token") {
-			fmt.Println("Access token received.")
-			break
+			accessToken, err := extractAccessToken(string(body))
+			if err != nil {
+				return "", err
+			}
+			return accessToken, nil
 		}
+		time.Sleep(time.Duration(interval) * time.Second)
 	}
-
+	return "", fmt.Errorf("access token not received within the maximum attempts")
 }
 
 func main() {
