@@ -66,6 +66,10 @@ func pollForAccessTokens(deviceCode string, clientID string) (string, error) {
 	return "", fmt.Errorf("access token not received within the maximum attempts")
 }
 
+func createRepo(token, repoName, description string, private bool) error {
+
+}
+
 func main() {
 	var clientID string
 	fmt.Print("Please enter your Github Client ID: ")
