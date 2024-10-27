@@ -67,7 +67,11 @@ func pollForAccessTokens(deviceCode string, clientID string) (string, error) {
 }
 
 func createRepo(token, repoName, description string, private bool) error {
-
+	repoRequest := RepoRequest{
+		Name:        repoName,
+		Description: description,
+		Private:     private,
+	}
 }
 
 func main() {
