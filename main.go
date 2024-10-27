@@ -1,9 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
-	"flag"
 	"fmt"
 	"io"
 	"net/http"
@@ -41,8 +38,8 @@ func pollForAccessTokens(deviceCode string, clientID string) (string, error) {
 	data.Set("device_code", deviceCode)
 	data.Set("client_id", clientID)
 
-	maxAttempts := 15
-	interval := 2
+	maxAttempts := 10
+	interval := 1
 
 	for attempt := 1; attempt <= maxAttempts; attempt++ {
 		resp, err := http.PostForm("https://github.com/login/oauth/access_token", data)
@@ -55,6 +52,7 @@ func pollForAccessTokens(deviceCode string, clientID string) (string, error) {
 		if err != nil {
 			return "", fmt.Errorf("error retrieving body: %v", err)
 		}
+		fmt.Printf("Polling attempt %d: %s\n", attempt, string(body))
 
 		if strings.Contains(string(body), "access_token") {
 			accessToken, err := extractAccessToken(string(body))
@@ -68,50 +66,16 @@ func pollForAccessTokens(deviceCode string, clientID string) (string, error) {
 	return "", fmt.Errorf("access token not received within the maximum attempts")
 }
 
-func createRepo(token, repoName, description string, private bool) error {
-	url := "https://api.github.com/user/repos"
-
-	repoData := RepoRequest{
-		Name:        repoName,
-		Description: description,
-		Private:     private,
-	}
-	jsonData, err := json.Marshal(repoData)
-	if err != nil {
-		return fmt.Errorf("error encoding JSON: %v", err)
-	}
-
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
-	if err != nil {
-		return fmt.Errorf("error creating request: %v", err)
-	}
-
-	req.Header.Set("Authorization", "Bearer "+token)
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return fmt.Errorf("error sending request: %v", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusCreated {
-		return fmt.Errorf("failed to create repo: %s", resp.Status)
-	}
-
-	fmt.Println("Repository created successfully.")
-	return nil
-}
-
 func main() {
 	var clientID string
 	fmt.Print("Please enter your Github Client ID: ")
 	fmt.Scan(&clientID)
+	fmt.Println(clientID)
 
 	data := url.Values{}
 	data.Set("client_id", clientID)
 	data.Set("scope", "repo")
+	fmt.Println("Form Data:", data.Encode())
 
 	githubUrl := "https://github.com/login/device/code"
 	resp, err := http.PostForm(githubUrl, data)
@@ -119,6 +83,8 @@ func main() {
 		fmt.Println("Error sending request", err)
 		return
 	}
+	fmt.Printf("Response Status: %s \n", resp.Status)
+
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
@@ -126,6 +92,8 @@ func main() {
 		fmt.Println("Error: ", err)
 		return
 	}
+
+	fmt.Println("Raw Response Body:", string(body))
 
 	values, err := url.ParseQuery(string(body))
 	if err != nil {
@@ -140,20 +108,5 @@ func main() {
 	fmt.Printf("Device Code: %s \n", deviceResponse.DeviceCode)
 	fmt.Printf("User Code: %s \n", deviceResponse.UserCode)
 	fmt.Printf("Verification URI: %s \n", deviceResponse.VerificationUri)
-
-	accessToken, err := pollForAccessTokens(deviceResponse.DeviceCode, clientID)
-	if err != nil {
-		fmt.Println("Error receiving access token:", err)
-		return
-	}
-
-	repoName := flag.String("name", "", "Name of the repository")
-	description := flag.String("desc", "", "Description of the repository")
-	private := flag.Bool("private", false, "Set repository as private")
-	flag.Parse()
-
-	err = createRepo(accessToken, *repoName, *description, *private)
-	if err != nil {
-		fmt.Println("Error creating repository:", err)
-	}
+	fmt.Println("Response received from GitHub")
 }
