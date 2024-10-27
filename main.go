@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -72,6 +73,12 @@ func createRepo(token, repoName, description string, private bool) error {
 		Description: description,
 		Private:     private,
 	}
+	jsonData, err := json.Marshal(repoRequest)
+	if err != nil {
+		fmt.Println("Error converting to json: ", err)
+
+	}
+	fmt.Println(string(jsonData))
 }
 
 func main() {
