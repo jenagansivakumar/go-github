@@ -41,8 +41,8 @@ func pollForAccessTokens(deviceCode string, clientID string) (string, error) {
 	data.Set("device_code", deviceCode)
 	data.Set("client_id", clientID)
 
-	maxAttempts := 10
-	interval := 1
+	maxAttempts := 15
+	interval := 2
 
 	for attempt := 1; attempt <= maxAttempts; attempt++ {
 		resp, err := http.PostForm("https://github.com/login/oauth/access_token", data)
