@@ -78,7 +78,8 @@ func createRepo(token, repoName, description string, private bool) error {
 		fmt.Println("Error converting to json: ", err)
 
 	}
-	fmt.Println(string(jsonData))
+	fmt.Println("DATA DATA DATA: ", string(jsonData))
+	return nil
 }
 
 func main() {
