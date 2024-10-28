@@ -77,21 +77,21 @@ func createRepo(token, repoName, description string, private bool) error {
 
 	jsonData, err := json.Marshal(repoRequest)
 	if err != nil {
-		fmt.Println("Error parsing json: ", err)
+		return fmt.Errorf("error parsing json: %v", err)
 	}
 
 	resp, err := http.Post("https://api.github.com/user/repos", "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
-		fmt.Println("error posting to endpoint: ", err)
+		return fmt.Errorf("error posting to endpoint: %v", err)
 	}
 
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Printf("error retrieving body: %v ", err)
+		return fmt.Errorf("error retrieving body: %v", err)
 	}
-	fmt.Println(body)
+	fmt.Println("Response: ", string(body))
 	return nil
 }
 
@@ -138,4 +138,16 @@ func main() {
 	fmt.Printf("User Code: %s \n", deviceResponse.UserCode)
 	fmt.Printf("Verification URI: %s \n", deviceResponse.VerificationUri)
 	fmt.Println("Response received from GitHub")
+
+	accessToken, err := pollForAccessTokens(deviceResponse.DeviceCode, clientID)
+	if err != nil {
+		fmt.Println("Error retrieving access token", err)
+		return
+	}
+
+	err = createRepo(accessToken, "Test-repo", "This is a test repo", true)
+	if err != nil {
+		fmt.Println("Error creating repo", err)
+	}
+	fmt.Println("Successfully created repo!")
 }
