@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -73,12 +74,22 @@ func createRepo(token, repoName, description string, private bool) error {
 		Description: description,
 		Private:     private,
 	}
+
 	jsonData, err := json.Marshal(repoRequest)
 	if err != nil {
-		fmt.Println("Error converting to json: ", err)
-
+		fmt.Println("Error parsing json: ", err)
 	}
-	fmt.Println("DATA DATA DATA: ", string(jsonData))
+
+	resp, err := http.Post("https://api.github.com/user/repos", "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		fmt.Println("error posting to endpoint: ", err)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("error retrieving body: ", err)
+	}
+	fmt.Println(body)
 	return nil
 }
 
