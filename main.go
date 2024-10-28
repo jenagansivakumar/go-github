@@ -12,9 +12,10 @@ import (
 )
 
 type DeviceResponse struct {
-	DeviceCode      string `json:"device_code"`
-	UserCode        string `json:"user_code"`
-	VerificationUri string `json:"verification_uri"`
+	DeviceCode      string
+	UserCode        string
+	VerificationUri string
+	Interval        int
 }
 
 type RepoRequest struct {
@@ -35,13 +36,13 @@ func extractAccessToken(body string) (string, error) {
 	return accessToken, nil
 }
 
-func pollForAccessTokens(deviceCode string, clientID string) (string, error) {
+func pollForAccessTokens(deviceCode, clientID string, interval int) (string, error) {
 	data := url.Values{}
 	data.Set("device_code", deviceCode)
 	data.Set("client_id", clientID)
+	data.Set("grant_type", "urn:ietf:params:oauth:grant-type:device_code")
 
 	maxAttempts := 10
-	interval := 1
 
 	for attempt := 1; attempt <= maxAttempts; attempt++ {
 		resp, err := http.PostForm("https://github.com/login/oauth/access_token", data)
@@ -80,11 +81,18 @@ func createRepo(token, repoName, description string, private bool) error {
 		return fmt.Errorf("error parsing json: %v", err)
 	}
 
-	resp, err := http.Post("https://api.github.com/user/repos", "application/json", bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest("POST", "https://api.github.com/user/repos", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return fmt.Errorf("error creating request: %v", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("error posting to endpoint: %v", err)
 	}
-
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
@@ -122,32 +130,33 @@ func main() {
 		return
 	}
 
-	fmt.Println("Raw Response Body:", string(body))
-
 	values, err := url.ParseQuery(string(body))
 	if err != nil {
-		fmt.Println("Error parsing JSON:", err)
+		fmt.Println("Error parsing response:", err)
 		return
 	}
-	var deviceResponse DeviceResponse
-	deviceResponse.DeviceCode = values.Get("device_code")
-	deviceResponse.UserCode = values.Get("user_code")
-	deviceResponse.VerificationUri = values.Get("verification_uri")
+
+	deviceResponse := DeviceResponse{
+		DeviceCode:      values.Get("device_code"),
+		UserCode:        values.Get("user_code"),
+		VerificationUri: values.Get("verification_uri"),
+		Interval:        5,
+	}
 
 	fmt.Printf("Device Code: %s \n", deviceResponse.DeviceCode)
 	fmt.Printf("User Code: %s \n", deviceResponse.UserCode)
 	fmt.Printf("Verification URI: %s \n", deviceResponse.VerificationUri)
-	fmt.Println("Response received from GitHub")
+	fmt.Println("Please go to the above URL and enter the user code to authenticate.")
 
-	accessToken, err := pollForAccessTokens(deviceResponse.DeviceCode, clientID)
+	accessToken, err := pollForAccessTokens(deviceResponse.DeviceCode, clientID, deviceResponse.Interval)
 	if err != nil {
-		fmt.Println("Error retrieving access token", err)
+		fmt.Println("Error retrieving access token:", err)
 		return
 	}
 
 	err = createRepo(accessToken, "Test-repo", "This is a test repo", true)
 	if err != nil {
-		fmt.Println("Error creating repo", err)
+		fmt.Println("Error creating repo:", err)
 	}
 	fmt.Println("Successfully created repo!")
 }
