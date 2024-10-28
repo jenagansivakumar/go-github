@@ -85,6 +85,8 @@ func createRepo(token, repoName, description string, private bool) error {
 		fmt.Println("error posting to endpoint: ", err)
 	}
 
+	defer resp.Body.Close()
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("error retrieving body: ", err)
