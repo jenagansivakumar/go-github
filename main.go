@@ -89,7 +89,7 @@ func createRepo(token, repoName, description string, private bool) error {
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("error retrieving body: ", err)
+		fmt.Printf("error retrieving body: %v ", err)
 	}
 	fmt.Println(body)
 	return nil
@@ -109,7 +109,7 @@ func main() {
 	githubUrl := "https://github.com/login/device/code"
 	resp, err := http.PostForm(githubUrl, data)
 	if err != nil {
-		fmt.Println("Error sending request", err)
+		fmt.Printf("Error sending request: %v", err)
 		return
 	}
 	fmt.Printf("Response Status: %s \n", resp.Status)
@@ -118,7 +118,7 @@ func main() {
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("Error: ", err)
+		fmt.Printf("Error: %v", err)
 		return
 	}
 
